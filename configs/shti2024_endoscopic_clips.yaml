@@ -1,0 +1,39 @@
+# Shi Y, Yu Y, Feng Y, Gong Y. A Data Pipeline for Enhancing Quality of
+# MAUDE-Based Studies. Stud Health Technol Inform. 2024;316:1214-1218.
+# doi:10.3233/SHTI240629
+
+name: shti2024_endoscopic_clips
+citation: "Stud Health Technol Inform. 2024;316:1214-1218. doi:10.3233/SHTI240629"
+description: >
+  Reproduction of a published MAUDE analysis of endoscopic clip adverse events
+  (Ramai et al., J Clin Gastroenterol 2023), which reported 2540 reports without
+  a specified extraction method. Manufacturer name is the primary filter because
+  it removes most unrelated reports before the generic-name keyword is applied.
+
+expected_reports: 2479   # Table 1, "Present work" row
+
+extract:
+  # Paper, Methods: "obtained MDRs from 2012 to 2020. The 2021 Quarter 1 file
+  # was specifically used to retrieve the MDRs in January 2021."
+  # The Q1 file is downloaded whole here; January is enforced in `clean`.
+  partitions: ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019",
+               "2020", "2021 Q1"]
+  device_filters:
+    # Paper, Methods: regular expressions on "the endoscopic clip manufacturers
+    # (Boston Scientific, Cook Endoscopy, Olympus, Micro-tech, Transmed,
+    # US Endoscopy, Ovesco, Conmed) and generic ("clip&pkl") names."
+    - field: manufacturer_d_name
+      pattern: '\b(BOSTON SCIENTIFIC|COOK ENDOSCOPY|OLYMPUS|MICRO-?TECH|TRANSMED|US ENDOSCOPY|OVESCO|CONMED)\b'
+    - field: generic_name
+      pattern: '\b(clip|pkl)\b'
+
+clean:
+  # Partitions are quarterly, so extraction overshoots a period that ends
+  # mid-quarter. Without this bound the cohort is 2541; the 66 extra reports
+  # are February and March 2021.
+  date_start: 20120101
+  date_end: 20210131
+  min_narrative_words: 0
+
+llm:
+  enabled: false   # this study predates the LLM stage

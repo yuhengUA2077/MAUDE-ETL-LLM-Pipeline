@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Data: never commit MDR extracts, intermediate tables, or inspection dumps.
+# Everything under data/ is ignored except the .gitkeep placeholders -- listing
+# subdirectories individually missed data/inspect/ when that was added later.
+data/**
+!data/**/
+!data/**/.gitkeep
+
+# Notebook outputs are stripped by nbstripout; see CONTRIBUTING note in README
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/

@@ -1,0 +1,14 @@
+# Core pipeline
+pandas>=2.0
+requests>=2.31
+PyYAML>=6.0
+
+# Visualisation
+plotly>=5.20
+kaleido>=0.2.1        # optional: static PNG export of figures
+
+# LLM stage
+pydantic>=2.0
+python-dotenv>=1.0
+openai>=1.50
+google-genai>=0.3

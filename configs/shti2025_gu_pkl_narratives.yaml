@@ -1,0 +1,46 @@
+# Shi Y, Gong Y. Leveraging LLMs to Understand Narratives in MAUDE Reports.
+# Stud Health Technol Inform. 2025;323:194-198. doi:10.3233/SHTI250076
+
+name: shti2025_gu_pkl_narratives
+citation: "Stud Health Technol Inform. 2025;323:194-198. doi:10.3233/SHTI250076"
+description: >
+  Q1 2021 pilot replacing the manufacturer/generic keyword search with MAUDE's
+  own indexed fields: medical specialty "Gastroenterology, Urology" plus product
+  code PKL ("hemostatic metal clip for the GI tract"). Narrower and more precise
+  than the 2024 strategy (95 reports vs 102) at the same patient-event yield.
+
+expected_reports: 95   # Table 1, Medical Specialty/Product Code row
+
+extract:
+  # Paper, Methods: "This study extends the analysis period to encompass the
+  # Q1 2021 as a pilot."
+  #
+  # OPEN QUESTION: you recall searching all four quarters of 2021. Q1 alone
+  # already returns 102 against a published 95, so widening to the full year can
+  # only widen the gap -- but it is one line to test: set partitions: ["2021"].
+  partitions: ["2021 Q1"]
+  # Paper, Methods: "the medical specialty description of Gastroenterology,
+  # Urology (GU) alongside the Product Classification Code PKL."
+  product_codes: ["PKL"]
+  openfda_filters:
+    - field: medical_specialty_description
+      pattern: 'Gastroenterology'
+
+clean:
+  # Paper, Methods: "a threshold of 100 words in MDR narratives was established
+  # to exclude reports containing excessively brief narrative texts."
+  # The Discussion notes this may exclude concise, high-quality reports;
+  # excluded rows are written to *_excluded.csv so the trade-off is inspectable.
+  min_narrative_words: 100
+  exclude_narrative_patterns:
+    - 'journal'
+    - 'doi'
+
+llm:
+  enabled: true
+  provider: openai
+  model: gpt-4-turbo
+  temperature: 0.0
+  # Ordered deliberately: open extraction, then vocabulary, then closed-set labels.
+  tasks: [narrative_extraction, consolidate_terms, use_case]
+  max_workers: 4

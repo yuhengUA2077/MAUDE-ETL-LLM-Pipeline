@@ -1,0 +1,49 @@
+# Shi Y, Yang E, Gong Y. Unveiling Endoscopic Procedures in MAUDE:
+# An ETL-LLM Method. Stud Health Technol Inform. 2025;328:96-100.
+# doi:10.3233/SHTI250680
+
+name: shti2025_ovesco_etl_llm
+citation: "Stud Health Technol Inform. 2025;328:96-100. doi:10.3233/SHTI250680"
+description: >
+  Reproduction of Telbany et al. (Gastrointest Endosc 2024) on over-the-scope
+  clips and full-thickness resection devices. The original used three
+  inconsistent time spans; this config uses one span covering all of them, and
+  recovers more device problems and patient events from the same 42 reports by
+  reading the narratives. Start-date sensitivity was checked: 2007 and 2013
+  both yield N=42.
+
+expected_reports: 42
+
+extract:
+  # Paper text says 2007 - Q3 2024; Figure 1 says 2013 - Q3 2024. Both starts
+  # were run and both return 42, so the finding does not depend on the choice;
+  # 2013 is used because it is the bound in Figure 1.
+  #
+  # The end bound is Q3, not all of 2024. Q4 2024 adds 40 reports (22 in
+  # November, 18 in December) that fall outside the study period -- 82 instead
+  # of 42.
+  partitions: ["2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020",
+               "2021", "2022", "2023",
+               "2024 Q1", "2024 Q2", "2024 Q3"]
+  device_filters:
+    # Paper, Extract Phase: "a combination of the Manufacturer Name OVESCO and
+    # the Brand Name (clip|OTSC|cutter|FTRD) with regular expressions."
+    #
+    # \bOVESCO\b rather than the full company name on purpose: manufacturer
+    # names in MAUDE are not standardised, and matching a full registered name
+    # drops the reports filed under a variant spelling.
+    - field: manufacturer_d_name
+      pattern: '\bOVESCO\b'
+    - field: brand_name
+      pattern: '(clip|otsc|cutter|ftrd)'
+
+clean:
+  min_narrative_words: 0
+
+llm:
+  enabled: true
+  provider: openai       # switch to `gemini` to re-run the same schema on Gemini
+  model: gpt-4-turbo
+  temperature: 0.0
+  tasks: [narrative_extraction, consolidate_terms, use_case]
+  max_workers: 4
