@@ -126,34 +126,26 @@ empty row.
 
 ## Reproducing the published studies
 
-| Config | Study | Reported N | Scan | Re-run | Result |
-|---|---|---|---|---|---|
-| `shti2025_ovesco_etl_llm` | [2025;328:96-100](https://doi.org/10.3233/SHTI250680) | 42 | 209 partitions · 17.4M records | **42** | **MATCH** |
-| `shti2024_endoscopic_clips` | [2024;316:1214-1218](https://doi.org/10.3233/SHTI240629) | 2479 | 117 partitions · 9.1M records | **2475** | −4 |
-| `shti2025_gu_pkl_narratives` | [2025;323:194-198](https://doi.org/10.3233/SHTI250076) | 95 | 6 partitions · 0.5M records | **102** | +7 |
+| Config | Study | Reported N | Scan |
+|---|---|---|---|
+| `shti2025_gu_pkl_narratives` | [2025;323:194-198](https://doi.org/10.3233/SHTI250076) | 95 | 6 partitions · 0.5M records |
+| `shti2024_endoscopic_clips` | [2024;316:1214-1218](https://doi.org/10.3233/SHTI240629) | 2479 | 117 partitions · 9.1M records |
+| `shti2025_ovesco_etl_llm` | [2025;328:96-100](https://doi.org/10.3233/SHTI250680) | 42 | 209 partitions · 17.4M records |
 
-All three re-run against the openFDA catalog of 2026-08-27, at roughly 24,000
-records/second on one machine. Scan sizes are read from the catalog, so the cost of a config is known before it
-runs.
+Scan sizes come from the openFDA catalog, so the cost of a config is known before
+it runs; throughput is roughly 24,000 records/second on one machine.
 
 Every boundary in a config is quoted from the paper it reproduces, because
-getting them approximately right is the same as getting them wrong. Two of the
-three studies end mid-quarter — one in January 2021, one at Q3 2024 — and
-rounding either to a whole year moves the answer a long way.
+getting them approximately right is the same as getting them wrong. Two of these
+studies end mid-quarter — one in January 2021, one at Q3 2024 — while partitions
+are quarterly, so the period is enforced in two places: which quarters get
+downloaded, and a date bound applied afterwards in `clean`.
 
-The pipeline compares each cohort against `expected_reports` and logs `MATCH` or
-the difference. One study reproduces exactly; the other two differ by −4 and +7.
-Both differences have been traced to their cause, report by report, using the
-tools described below. That analysis is being written up separately and is not
-reproduced here.
-
-The general point stands without it: **a MAUDE query is not reproducible without
-the date it was run.** The corpus is amended after publication, so the same
-query returns different answers at different times, and nothing in a published
-paper usually says when the extraction happened. Every cohort produced here is
-stamped with the catalog's `export_date` in a `.meta.json` beside it, and the
-comparison against the published N runs as part of the pipeline rather than by
-hand afterwards.
+Each run compares its cohort against `expected_reports` and logs `MATCH` or the
+difference. Differences are expected — MAUDE is amended after publication, so the
+same query returns different answers at different times — which is why every
+cohort is stamped with the catalog's `export_date` in a `.meta.json` beside it.
+**A MAUDE query is not reproducible without the date it was run.**
 
 ## Bugs worth describing
 
@@ -200,33 +192,29 @@ and Linux.
 ## Auditing a difference
 
 When a re-run disagrees with a published number, the useful question is which
-reports differ and what changed about them. Four tools answer that in order, and
-together they are how every difference in the table above was traced:
+reports differ and what changed about them. Four tools answer that in order:
 
 ```bash
 # 1. Is the cohort itself sound? Duplicate keys, date spread, what the
 #    filters actually admitted, reports carrying more than one device.
-python tools/diagnose_cohort.py data/interim/<study>_cohort.jsonl 2479
+python tools/diagnose_cohort.py data/interim/<study>_cohort.jsonl <published_N>
 
 # 2. Which specific reports differ from an earlier result?
 python tools/compare_cohorts.py old_result.csv data/processed/<study>_clean.csv
 
 # 3. Do those reports still exist, and when were they last changed?
-python tools/check_missing.py <key> <key> <key>          # keys from step 2
+python tools/check_missing.py <key> <key> <key>
 
 # 4. What do they look like now -- and does the live API agree with the
 #    bulk download this pipeline reads?
-python tools/dump_reports.py --keys <key> --partitions "2018 Q3"
+python tools/dump_reports.py --keys <key> --partitions "<YYYY Qn>"
 ```
 
-Step 1 rules out the explanations that are your own fault. Step 2 turns "four
-reports short" into four report keys. Step 3 turns four keys into four
-timestamps. Step 4 gets the raw JSON.
+Step 1 rules out the explanations that are your own fault. Step 2 turns a count
+into report keys. Step 3 turns keys into timestamps. Step 4 gets the raw JSON.
 
-Applied to the two studies whose numbers moved, this chain identified every
-differing report and the date each was last edited. The scripts are generic —
-they take report keys and file paths, not anything specific to these three
-studies.
+The scripts take report keys and file paths, so they work on any MAUDE cohort,
+not just the three studies here.
 
 ## Setup
 
