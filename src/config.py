@@ -35,7 +35,7 @@ class FieldFilter:
 class ExtractConfig:
     # Which quarters to download. Accepts a year ("2012") or a quarter
     # ("2021 Q1"); None downloads the whole corpus. This is what defines the
-    # study period -- there is deliberately no record-level date filter here.
+    # study period. There is deliberately no record-level date filter here.
     # Bounding a cohort by date is a downstream concern, and mixing it into the
     # download stage makes a filtered-out quarter indistinguishable from an
     # empty one in the logs.

@@ -33,7 +33,7 @@ def load_catalog(cache_path: Path | None = None) -> dict[str, Any]:
     """Fetch the openFDA download catalog, caching it locally.
 
     The catalog carries per-partition record counts, which is where the corpus
-    totals quoted in the README come from -- no full scan required.
+    totals quoted in the README come from, so no full scan is required.
     """
     if cache_path and cache_path.exists():
         return json.loads(cache_path.read_text())
@@ -68,8 +68,8 @@ QUARTER_RE = re.compile(r"\b((?:19|20)\d{2})\s*Q([1-4])\b", re.IGNORECASE)
 def partition_quarter(display_name: str) -> str | None:
     """Normalise a partition label to 'YYYY QN'.
 
-    openFDA splits busy quarters across several files -- a quarter appears either
-    as '2004 Q3 (all)' or as '2021 Q1 (part 1 of 6)' through '(part 6 of 6)'.
+    openFDA splits busy quarters across several files. A quarter appears either as
+    '2004 Q3 (all)' or as '2021 Q1 (part 1 of 6)' through '(part 6 of 6)'.
     Selecting a quarter must therefore match every one of its parts.
     """
     m = QUARTER_RE.search(display_name)
@@ -80,7 +80,7 @@ def config_fingerprint(cfg: ExtractConfig) -> str:
     """Stable hash of everything that determines which records match.
 
     The checkpoint is keyed on this. Resuming a run whose filters have changed
-    would silently mix records selected under two different configs -- and the
+    would silently mix records selected under two different configs, and the
     resulting cohort would look like a completed run, which is worse than a
     crash.
     """
@@ -165,7 +165,7 @@ def has_device_data(record: dict) -> bool:
     """Whether the record carries any device block at all.
 
     Device-field filters cannot see a report with an empty device array, so such
-    reports drop out of every device-keyed cohort silently -- the record is still
+    reports drop out of every device-keyed cohort silently. The record is still
     published, it just stops matching. Counting them makes that visible in the
     run stats.
     """
@@ -250,7 +250,7 @@ def run_extract(
     done: set[str] = set()
     if not resume:
         # An explicit re-run must not append to, or silently reuse, the previous
-        # cohort -- that is exactly the failure mode the fingerprint guards
+        # cohort. That is exactly the failure mode the fingerprint guards
         # against when a config changes.
         if out_path.exists() or state_path.exists():
             log.info("Re-running from scratch; discarding the previous cohort.")

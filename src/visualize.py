@@ -6,7 +6,7 @@ carried its 41 rows pasted inline, which meant the figure could not be regenerat
 when the cohort changed and did not match the 42 reports reported in the paper.
 
 Because the long-form problem tables are one row per category, no delimiter
-splitting happens here at all -- the hand-maintained list of comma-containing
+splitting happens here at all. The hand-maintained list of comma-containing
 category names the original script needed is gone.
 """
 

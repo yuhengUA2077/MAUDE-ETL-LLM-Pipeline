@@ -3,9 +3,9 @@
 Two known defects in the original implementation are fixed here:
 
 1. Multi-valued fields (product_problems, patient_problems) were joined with
-   ", ". MAUDE category names contain commas themselves -- "Activation,
-   Positioning or Separation Problem" is one category, not three -- so the join
-   was not reversible, and downstream code had to carry a hand-maintained list
+   ", ". MAUDE category names contain commas of their own: "Activation,
+   Positioning or Separation Problem" is one category, not three. The join was
+   therefore not reversible, and downstream code had to carry a hand-maintained list
    of exceptions to split it back. A pipe delimiter is used instead, and the
    long-form tables keep one row per value so no un-splitting is needed at all.
 

@@ -20,8 +20,7 @@ extract:
   # 2013 is used because it is the bound in Figure 1.
   #
   # The end bound is Q3, not all of 2024. Q4 2024 adds 40 reports (22 in
-  # November, 18 in December) that fall outside the study period -- 82 instead
-  # of 42.
+  # November, 18 in December) that fall outside the study period.
   partitions: ["2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020",
                "2021", "2022", "2023",
                "2024 Q1", "2024 Q2", "2024 Q3"]

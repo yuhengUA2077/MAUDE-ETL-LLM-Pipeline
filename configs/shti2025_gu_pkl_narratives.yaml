@@ -17,7 +17,7 @@ extract:
   #
   # OPEN QUESTION: you recall searching all four quarters of 2021. Q1 alone
   # already returns 102 against a published 95, so widening to the full year can
-  # only widen the gap -- but it is one line to test: set partitions: ["2021"].
+  # only widen the gap. It is one line to test: set partitions: ["2021"].
   partitions: ["2021 Q1"]
   # Paper, Methods: "the medical specialty description of Gastroenterology,
   # Urology (GU) alongside the Product Classification Code PKL."
